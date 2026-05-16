@@ -71,14 +71,15 @@ async function triggerCandidateOutreach(slotPool, uniqueSlotTimes) {
   // Sort chronologically
   const sortedSlots = [...uniqueSlotTimes].sort((a, b) => new Date(a) - new Date(b))
 
+  // Send email first — only update status after successful send so scheduler can retry on failure
+  await sendCandidateSlotEmail({ candidate, slots: sortedSlots, candidateToken })
+
   await SlotPool.findByIdAndUpdate(slotPool._id, {
     candidateToken,
     candidateTokenStatus: 'PENDING',
     candidateTokenExpiresAt,
     status: 'awaiting_candidate'
   })
-
-  await sendCandidateSlotEmail({ candidate, slots: sortedSlots, candidateToken })
 }
 
 module.exports = { handlePanelistResponse, triggerCandidateOutreach }
