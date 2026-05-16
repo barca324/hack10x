@@ -15,6 +15,14 @@ import { toast } from "sonner";
 
 export const Route = createFileRoute("/_app/interviews")({ component: InterviewsPage });
 
+const STATUS_LABEL: Record<string, string> = {
+  done: "Interview Completed",
+};
+
+function statusLabel(s: string) {
+  return STATUS_LABEL[s] ?? s.replace(/_/g, " ");
+}
+
 function InterviewsPage() {
   const { isAdmin, isHR } = useAuth();
   const qc = useQueryClient();
@@ -172,7 +180,7 @@ function InterviewsPage() {
                     <td className="px-4 py-3">{i.candidates?.role_applied || "—"}</td>
                     <td className="px-4 py-3">{i.panelists?.name || "—"}</td>
                     <td className="px-4 py-3">R{i.round_number}</td>
-                    <td className="px-4 py-3 capitalize text-xs">{i.status.replace(/_/g, " ")}</td>
+                    <td className="px-4 py-3 capitalize text-xs">{statusLabel(i.status)}</td>
                     <td className="px-4 py-3">
                       {i.report_html ? (
                         <Button variant="ghost" size="sm" className="h-7 px-2 text-xs" onClick={() => setReportInterview(i)}>

@@ -85,7 +85,7 @@ app.post('/api/interviews/submit-feedback', async (req, res) => {
   interview.reportHtml = reportHtml ?? null
   await interview.save()
 
-  await Candidate.findByIdAndUpdate(interview.candidateId, { interviewStatus: 'interview_completed' })
+  await Candidate.findByIdAndUpdate(interview.candidateId, { interviewStatus: 'completed' })
 
   res.json({ message: 'Feedback submitted', interviewId: interview._id })
 })
