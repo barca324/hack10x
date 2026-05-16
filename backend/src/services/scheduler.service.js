@@ -2,12 +2,11 @@ const SlotPool = require('../models/SlotPool')
 const Candidate = require('../models/Candidate')
 const { deduplicateSlots } = require('../utils/deduplicateSlots')
 const { triggerCandidateOutreach } = require('./slotPool.service')
-const { runOutreachWorkflow, handleOutreachFailure } = require('./outreach.service')
+const { sendAdminAlertEmail } = require('./email.service')
 
 async function runCandidateOutreachScheduler() {
   const now = new Date()
 
-  // ── Part 1: Fire candidate slot-selection email for due pools ─────────────
   const duePools = await SlotPool.find({
     status: 'awaiting_panelists',
     candidateOutreachAfter: { $lte: now }
@@ -20,29 +19,14 @@ async function runCandidateOutreachScheduler() {
       if (uniqueSlotTimes.length === 0) {
         const candidate = await Candidate.findById(pool.candidateId)
         await SlotPool.findByIdAndUpdate(pool._id, { status: 'no_slots' })
-        await handleOutreachFailure(candidate, 'no_panelist_response')
-        console.warn(`No slots collected for ${candidate.name} — retry scheduled`)
+        await sendAdminAlertEmail({ candidate })
+        console.warn(`No slots collected for ${candidate.name} — HR alerted`)
         continue
       }
 
       await triggerCandidateOutreach(pool, uniqueSlotTimes)
     } catch (err) {
       console.error(`Scheduler error for SlotPool ${pool._id}:`, err.message)
-    }
-  }
-
-  // ── Part 2: Retry outreach for candidates whose retry time is due ─────────
-  const retryDue = await Candidate.find({
-    interviewStatus: 'pending',
-    nextOutreachAt: { $ne: null, $lte: now }
-  })
-
-  for (const candidate of retryDue) {
-    try {
-      console.log(`[Scheduler] Retrying outreach for ${candidate.name} (retry #${candidate.outreachRetryCount})`)
-      await runOutreachWorkflow(candidate)
-    } catch (err) {
-      console.error(`Retry outreach error for ${candidate.name}:`, err.message)
     }
   }
 }

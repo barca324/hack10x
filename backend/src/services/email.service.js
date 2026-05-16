@@ -166,14 +166,21 @@ async function sendCandidateConfirmationEmail({ candidate, scheduledAt, meetLink
 
 // ── Fallback: No Eligible Panelists Alert ─────────────────────────────────────
 async function sendAdminAlertEmail({ candidate }) {
+  const to = candidate.addedBy || process.env.SUPER_ADMIN_EMAIL
+  const scheduleLink = `${process.env.FRONTEND_URL}/interviews`
   await sendMail({
-    to: process.env.SUPER_ADMIN_EMAIL,
-    subject: `No Eligible Panelists — ${candidate.name} (${candidate.roleApplied})`,
+    to,
+    subject: `Action Required: No Panelists Available — ${candidate.name} (${candidate.roleApplied})`,
     html: `
       <div style="font-family:sans-serif;max-width:520px;margin:auto">
-        <h2 style="color:#dc2626">No Eligible Panelists Found</h2>
-        <p>No eligible panelists were found for candidate <strong>${candidate.name}</strong> applying for <strong>${candidate.roleApplied}</strong>.</p>
-        <p>Please check panelist availability and calendar authorization status in the admin panel.</p>
+        <h2 style="color:#dc2626">No Panelists Available</h2>
+        <p>No available panelists were found for <strong>${candidate.name}</strong> applying for <strong>${candidate.roleApplied}</strong>.</p>
+        <p>Please contact a panelist directly and schedule the interview manually from the portal:</p>
+        <p style="margin:24px 0">
+          <a href="${scheduleLink}" style="background:#4f46e5;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:600">
+            Schedule Interview
+          </a>
+        </p>
       </div>`
   })
 }

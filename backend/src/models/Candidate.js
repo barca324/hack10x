@@ -12,9 +12,7 @@ const candidateSchema = new mongoose.Schema({
   interviewStatus: { type: String, default: 'pending' },
   assignedPanelistId: { type: mongoose.Schema.Types.ObjectId, ref: 'Panelist' },
   addedBy: String,
-  addedOn: { type: Date, default: Date.now },
-  outreachRetryCount: { type: Number, default: 0 },
-  nextOutreachAt: { type: Date, default: null }
+  addedOn: { type: Date, default: Date.now }
 })
 
 module.exports = mongoose.model('Candidate', candidateSchema)
