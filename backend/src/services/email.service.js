@@ -1,24 +1,15 @@
-const nodemailer = require('nodemailer')
+const { Resend } = require('resend')
 
-// ── SMTP Transporter (Gmail App Password) ─────────────────────────────────────
-const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    user: process.env.GMAIL_USER,
-    pass: process.env.GMAIL_APP_PASSWORD
-  }
-})
+const resend = new Resend(process.env.RESEND_API_KEY)
+const FROM = process.env.FROM_EMAIL || 'onboarding@resend.dev'
 
-/**
- * Core send helper
- */
 async function sendMail({ to, subject, html, bcc }) {
-  await transporter.sendMail({
-    from: `"Interview Scheduler" <${process.env.FROM_EMAIL}>`,
-    to,
+  await resend.emails.send({
+    from: `Interview Scheduler <${FROM}>`,
+    to: Array.isArray(to) ? to : [to],
     subject,
     html,
-    ...(bcc && { bcc })
+    ...(bcc && { bcc: Array.isArray(bcc) ? bcc : [bcc] }),
   })
 }
 
