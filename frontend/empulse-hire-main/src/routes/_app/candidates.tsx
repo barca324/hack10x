@@ -100,7 +100,11 @@ function CandidatesPage() {
   const clearFilters = () => { setQ(""); setRoleFilter("all"); setStatusFilter("all"); setPanelistFilter("all"); };
 
   const submit = async () => {
-    if (!form.phone) return toast.error("Phone is required");
+    if (!form.name.trim()) return toast.error("Name is required");
+    if (!form.email.trim()) return toast.error("Email is required");
+    if (!form.email.toLowerCase().endsWith("@gmail.com")) return toast.error("Email must be a Gmail address");
+    if (!form.phone.trim()) return toast.error("Phone is required");
+    if (!/^\d{10}$/.test(form.phone.trim())) return toast.error("Phone must be a 10-digit number");
     if (!form.resume_url) return toast.error("Resume Drive link is required");
     if (!form.jd_url) return toast.error("JD Drive link is required");
     try {
