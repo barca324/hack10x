@@ -91,12 +91,10 @@ export function AppSidebar() {
           <div className="mb-2 px-2">
             <div className="text-xs font-semibold truncate">{auth.allowed.name}</div>
             <div className="text-[10px] text-sidebar-foreground/60 truncate">{auth.allowed.email}</div>
-            <div className="flex gap-1 mt-1 flex-wrap">
-              {auth.roles.map((r) => (
-                <span key={r} className="text-[9px] uppercase bg-sidebar-accent px-1.5 py-0.5 rounded">
-                  {r}
-                </span>
-              ))}
+            <div className="flex gap-1 mt-1">
+              <span className="text-[9px] uppercase bg-sidebar-accent px-1.5 py-0.5 rounded">
+                {auth.isAdmin ? "Admin" : "HR"}
+              </span>
             </div>
           </div>
         )}
