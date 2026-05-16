@@ -69,4 +69,13 @@ router.post('/:id/resend-calendar-auth', isAdmin, async (req, res, next) => {
   } catch (err) { next(err) }
 })
 
+// Delete a panelist — admin only
+router.delete('/:id', isAdmin, async (req, res, next) => {
+  try {
+    const panelist = await Panelist.findByIdAndDelete(req.params.id)
+    if (!panelist) return res.status(404).json({ error: 'Panelist not found' })
+    res.json({ message: 'Panelist deleted' })
+  } catch (err) { next(err) }
+})
+
 module.exports = router

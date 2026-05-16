@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Search, X } from "lucide-react";
+import { Plus, Search, X, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_app/panelists")({ component: PanelistsPage });
@@ -113,13 +113,22 @@ function PanelistsPage() {
                   <th className="px-4 py-3 text-left">Conducted</th>
                   <th className="px-4 py-3 text-left">Selected</th>
                   <th className="px-4 py-3 text-left">Sel %</th>
+                  {isAdmin && <th className="px-4 py-3 text-left"></th>}
                 </tr>
               </thead>
               <tbody>
                 {filtered.length === 0 ? (
-                  <tr><td colSpan={8} className="text-center py-12 text-muted-foreground">No panelists match the filters.</td></tr>
+                  <tr><td colSpan={isAdmin ? 9 : 8} className="text-center py-12 text-muted-foreground">No panelists match the filters.</td></tr>
                 ) : filtered.map((p: any, i: number) => {
                   const pct = p.total_interviews ? Math.round((p.total_selected / p.total_interviews) * 100) : 0;
+                  const deletePanelist = async () => {
+                    if (!confirm(`Delete ${p.name}? This cannot be undone.`)) return;
+                    try {
+                      await api(`/api/panelists/${p.id}`, { method: "DELETE" });
+                      toast.success("Panelist deleted");
+                      qc.invalidateQueries({ queryKey: ["panelists"] });
+                    } catch (e: any) { toast.error(e.message ?? "Failed to delete"); }
+                  };
                   return (
                     <tr key={p.id} className="border-t hover:bg-accent/40">
                       <td className="px-4 py-3 text-muted-foreground">{i + 1}</td>
@@ -130,6 +139,13 @@ function PanelistsPage() {
                       <td className="px-4 py-3">{p.total_interviews}</td>
                       <td className="px-4 py-3">{p.total_selected}</td>
                       <td className="px-4 py-3 font-medium">{pct}%</td>
+                      {isAdmin && (
+                        <td className="px-4 py-3">
+                          <Button variant="ghost" size="sm" onClick={deletePanelist} className="text-destructive hover:text-destructive hover:bg-destructive/10">
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </td>
+                      )}
                     </tr>
                   );
                 })}
