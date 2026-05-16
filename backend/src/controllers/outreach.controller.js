@@ -35,35 +35,24 @@ exports.panelistRespond = async (req, res) => {
       const { skippedSlots, acceptedSlots } = await handlePanelistResponse(log, confirmedSlots)
 
       if (skippedSlots.length > 0) {
-        const fmt = d => d.toLocaleString('en-IN', {
-          dateStyle: 'medium', timeStyle: 'short', timeZone: 'Asia/Kolkata'
-        })
-        const skippedList  = skippedSlots.map(s  => `<li>${fmt(s)}</li>`).join('')
-        const acceptedList = acceptedSlots.map(s => `<li>${fmt(s)}</li>`).join('')
-        const allSkipped   = acceptedSlots.length === 0
-
+        const allSkipped = acceptedSlots.length === 0
         if (allSkipped) {
           return res.send(htmlPage(
             'Slots Already Booked',
-            `None of your selected slots could be recorded — you have already committed them to another interview:<ul style="text-align:left">${skippedList}</ul>Please contact HR if you believe this is a mistake.`
+            `None of your selected slots could be recorded — they are already committed to another interview.<br><br>Please contact HR if you believe this is a mistake.`
           ))
         }
-
         return res.send(htmlPage(
           'Partially Recorded',
-          `The following slot(s) have been successfully recorded:<ul style="text-align:left">${acceptedList}</ul>` +
-          `The following slot(s) could not be added as you have already booked them for another interview:<ul style="text-align:left">${skippedList}</ul>`
+          `The following slot(s) have been successfully recorded:<br><br>${slotsTable(acceptedSlots)}` +
+          `<br>The following slot(s) were already booked:<br><br>${slotsTable(skippedSlots)}`
         ))
       }
 
-      const fmt = d => d.toLocaleString('en-IN', {
-        dateStyle: 'medium', timeStyle: 'short', timeZone: 'Asia/Kolkata'
-      })
-      const acceptedList = acceptedSlots.map(s => `<li>${fmt(s)}</li>`).join('')
       return res.send(htmlPage(
         'Thank You',
         `Your availability has been recorded. We will get back to you with the confirmed schedule.` +
-        (acceptedList ? `<br><br><strong>Your selected slot(s):</strong><ul style="text-align:left">${acceptedList}</ul>` : '')
+        (acceptedSlots.length ? `<br><br><strong>Your selected slot(s):</strong><br><br>${slotsTable(acceptedSlots)}` : '')
       ))
     }
 
@@ -95,6 +84,28 @@ exports.candidateRespond = async (req, res) => {
     console.error('candidateRespond error:', err)
     res.send(htmlPage('Error', 'Something went wrong. Please contact HR.'))
   }
+}
+
+function slotsTable(slots) {
+  const rows = slots.map((d, i) => {
+    const date = d.toLocaleString('en-IN', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric', timeZone: 'Asia/Kolkata' })
+    const timeStart = d.toLocaleString('en-IN', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Kolkata' })
+    const timeEnd = new Date(d.getTime() + 60 * 60 * 1000).toLocaleString('en-IN', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Kolkata' })
+    const bg = i % 2 === 0 ? '#ffffff' : '#f9f9f9'
+    return `<tr style="background:${bg}">
+      <td style="padding:10px 18px;border:1px solid #e5e7eb">${date}</td>
+      <td style="padding:10px 18px;border:1px solid #e5e7eb">${timeStart} – ${timeEnd}</td>
+    </tr>`
+  }).join('')
+  return `<table style="border-collapse:collapse;margin:0 auto;min-width:320px">
+    <thead>
+      <tr style="background:#f3f4f6">
+        <th style="padding:10px 18px;border:1px solid #e5e7eb;font-size:13px">Date</th>
+        <th style="padding:10px 18px;border:1px solid #e5e7eb;font-size:13px">Time</th>
+      </tr>
+    </thead>
+    <tbody>${rows}</tbody>
+  </table>`
 }
 
 function htmlPage(title, message) {
