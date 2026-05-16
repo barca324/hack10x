@@ -80,7 +80,8 @@ function CandidatesPage() {
   const enriched = useMemo(
     () => (candidates as any[]).map((c) => {
       const li = latestByCand.get(String(c.id));
-      return { ...c, panelist_name: li?.panelists?.name ?? null, interview_status: li?.status ?? c.status };
+      const interviewStatus = li?.status === 'done' ? c.status : (li?.status ?? c.status);
+      return { ...c, panelist_name: li?.panelists?.name ?? null, interview_status: interviewStatus };
     }),
     [candidates, latestByCand],
   );
