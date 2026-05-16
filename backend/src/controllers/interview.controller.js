@@ -21,7 +21,7 @@ exports.listInterviews = async (req, res, next) => {
     }
 
     let query = Interview.find(filter)
-      .populate('candidateId', 'name email roleApplied resumeUrl levelCode')
+      .populate('candidateId', 'name email roleApplied resumeUrl levelCode addedBy')
       .populate('panelistId', 'name email empId position')
       .sort({ scheduledAt: -1 })
 

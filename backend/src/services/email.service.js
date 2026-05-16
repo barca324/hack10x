@@ -39,31 +39,44 @@ async function sendPanelistOutreachEmail({ panelist, candidate, freeSlots, outre
   const base = `${process.env.APP_BASE_URL}/api/outreach/panelist-respond?token=${outreachToken}`
   const declineLink = `${base}&action=decline`
 
-  const slotLinks = freeSlots.map((slot, i) => {
-    const label = new Date(slot).toLocaleString('en-IN', {
-      weekday: 'short', day: 'numeric', month: 'short',
-      hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Kolkata'
-    })
-    const confirmLink = `${base}&action=confirm&slots=${encodeURIComponent(slot.toISOString())}`
-    return `<li style="margin:8px 0">
-      <strong>${label}</strong> — 
-      <a href="${confirmLink}" style="color:#4f46e5;font-weight:600">I'm Available</a>
-    </li>`
+  const slotRows = freeSlots.map((slot, i) => {
+    const d = new Date(slot)
+    const date = d.toLocaleString('en-IN', { weekday: 'short', day: 'numeric', month: 'short', timeZone: 'Asia/Kolkata' })
+    const timeStart = d.toLocaleString('en-IN', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Kolkata' })
+    const timeEnd = new Date(d.getTime() + 60 * 60 * 1000).toLocaleString('en-IN', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Kolkata' })
+    const confirmLink = `${base}&action=confirm&slots=${encodeURIComponent(d.toISOString())}`
+    const bg = i % 2 === 0 ? '#ffffff' : '#f9f9f9'
+    return `<tr style="background:${bg}">
+      <td style="padding:10px 14px;border:1px solid #e5e7eb">${date}</td>
+      <td style="padding:10px 14px;border:1px solid #e5e7eb">${timeStart} – ${timeEnd}</td>
+      <td style="padding:10px 14px;border:1px solid #e5e7eb;text-align:center">
+        <a href="${confirmLink}" style="color:#4f46e5;font-weight:600;text-decoration:none">I'm Available</a>
+      </td>
+    </tr>`
   }).join('')
 
   await sendMail({
     to: panelist.email,
     subject: `Interview Availability Request — ${candidate.name} (${candidate.roleApplied})`,
     html: `
-      <div style="font-family:sans-serif;max-width:560px;margin:auto">
+      <div style="font-family:sans-serif;max-width:600px;margin:auto">
         <h2 style="color:#1a1a2e">Hi ${panelist.name},</h2>
         <p>We are scheduling an interview for <strong>${candidate.name}</strong> applying for <strong>${candidate.roleApplied}</strong>.</p>
-        <p>Please confirm which of the following 1-hour slots you are available for:</p>
-        <ul style="padding-left:16px">${slotLinks}</ul>
-        <p style="margin-top:24px">
-          <a href="${declineLink}" style="color:#dc2626;font-weight:600">I'm Not Available / Decline</a>
+        <p>Please confirm a 1-hour slot you are available for:</p>
+        <table style="border-collapse:collapse;width:100%;margin:16px 0">
+          <thead>
+            <tr style="background:#f3f4f6">
+              <th style="padding:10px 14px;border:1px solid #e5e7eb;text-align:left;font-size:13px">Date</th>
+              <th style="padding:10px 14px;border:1px solid #e5e7eb;text-align:left;font-size:13px">Time</th>
+              <th style="padding:10px 14px;border:1px solid #e5e7eb;text-align:center;font-size:13px">Availability</th>
+            </tr>
+          </thead>
+          <tbody>${slotRows}</tbody>
+        </table>
+        <p style="margin-top:20px">
+          <a href="${declineLink}" style="display:inline-block;background:#dc2626;color:#fff;padding:10px 24px;border-radius:6px;text-decoration:none;font-weight:600;font-size:14px">I'm Not Available</a>
         </p>
-        <p style="color:#888;font-size:13px">This link expires in 48 hours.</p>
+        <p style="color:#888;font-size:13px;margin-top:16px">This link expires in 48 hours.</p>
       </div>`
   })
 }

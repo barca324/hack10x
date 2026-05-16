@@ -35,6 +35,7 @@ export function normalizeInterview(i: any) {
     created_at: i.createdAt ?? null,
     resolved_at: null,
     cancellation_reason: null,
+    recruiter: cand.addedBy ?? null,
     candidates: cand.name
       ? { name: cand.name, level_code: cand.levelCode ?? 'E1', role_applied: cand.roleApplied ?? null }
       : null,

@@ -163,7 +163,7 @@ function InterviewsPage() {
             <table className="w-full text-sm">
               <thead className="bg-muted/50 text-xs uppercase text-muted-foreground">
                 <tr>
-                  {["#", "Date", "Slot", "Candidate", "Role", "Panelist", "Round", "Status", "Report"].map((h) => (
+                  {["#", "Date", "Slot", "Candidate", "Role", "Panelist", "Recruiter", "Status", "Report"].map((h) => (
                     <th key={h} className="px-4 py-3 text-left">{h}</th>
                   ))}
                 </tr>
@@ -179,7 +179,7 @@ function InterviewsPage() {
                     <td className="px-4 py-3 font-medium">{i.candidates?.name || "—"}</td>
                     <td className="px-4 py-3">{i.candidates?.role_applied || "—"}</td>
                     <td className="px-4 py-3">{i.panelists?.name || "—"}</td>
-                    <td className="px-4 py-3">R{i.round_number}</td>
+                    <td className="px-4 py-3 text-xs text-muted-foreground">{i.recruiter || "—"}</td>
                     <td className="px-4 py-3 capitalize text-xs">{statusLabel(i.status)}</td>
                     <td className="px-4 py-3">
                       {i.report_html ? (
