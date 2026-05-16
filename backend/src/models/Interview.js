@@ -9,6 +9,8 @@ const interviewSchema = new mongoose.Schema({
   selected: { type: Boolean, default: null },   // true | false | null (not yet decided)
   roleApplied: String,
   meetLink: String,
+  reportHtml: String,
+  score: Number,
   createdAt: { type: Date, default: Date.now }
 })
 

@@ -21,13 +21,20 @@ const app = express()
 // Trust Railway's reverse proxy so secure cookies work over HTTPS
 app.set('trust proxy', 1)
 
-// ── CORS — allow frontend to send cookies cross-origin ────────────────────────
-const FRONTEND = process.env.FRONTEND_URL || 'http://localhost:5173'
+// ── CORS — allow frontend + Chrome extension cross-origin ─────────────────────
+const ALLOWED_ORIGINS = new Set([
+  process.env.FRONTEND_URL || 'http://localhost:8080',
+  'http://localhost:8080',
+  process.env.EXTENSION_ORIGIN || 'chrome-extension://plnjlaflnkjchlaapbjpllbledijdlla',
+])
 app.use((req, res, next) => {
-  res.setHeader('Access-Control-Allow-Origin', FRONTEND)
+  const origin = req.headers.origin
+  if (origin && ALLOWED_ORIGINS.has(origin)) {
+    res.setHeader('Access-Control-Allow-Origin', origin)
+  }
   res.setHeader('Access-Control-Allow-Credentials', 'true')
   res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PATCH,DELETE,OPTIONS')
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization')
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-API-Key')
   if (req.method === 'OPTIONS') return res.sendStatus(200)
   next()
 })
@@ -54,6 +61,32 @@ app.use(passport.initialize())
 app.use(passport.session())
 
 // ── Routes ────────────────────────────────────────────────────────────────────
+// ── Extension feedback (no session — uses API key) ────────────────────────────
+const Interview = require('./models/Interview')
+app.post('/api/interviews/submit-feedback', async (req, res) => {
+  const key = req.headers['x-api-key']
+  if (!key || key !== process.env.EXTENSION_API_KEY)
+    return res.status(401).json({ error: 'Invalid API key' })
+
+  const { meetLink, score, recommendation, reportHtml } = req.body
+  if (!meetLink) return res.status(400).json({ error: 'meetLink required' })
+
+  const interview = await Interview.findOne({ meetLink })
+  if (!interview) return res.status(404).json({ error: 'Interview not found for this Meet link' })
+
+  const selected =
+    recommendation === 'yes' ? true :
+    recommendation === 'no' ? false : null
+
+  interview.status = 'Done'
+  interview.selected = selected
+  interview.score = score ?? null
+  interview.reportHtml = reportHtml ?? null
+  await interview.save()
+
+  res.json({ message: 'Feedback submitted', interviewId: interview._id })
+})
+
 app.use('/api/auth', authRoutes)
 app.use('/api/admin', adminRoutes)
 app.use('/api/candidates', candidateRoutes)

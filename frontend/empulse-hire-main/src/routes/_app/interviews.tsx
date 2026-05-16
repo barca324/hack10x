@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { Search, X, Plus } from "lucide-react";
+import { Search, X, Plus, FileText } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_app/interviews")({ component: InterviewsPage });
@@ -24,6 +24,7 @@ function InterviewsPage() {
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({ candidateId: "", panelistId: "", date: "", time: "" });
   const [submitting, setSubmitting] = useState(false);
+  const [reportInterview, setReportInterview] = useState<any>(null);
 
   const { data: interviews = [] } = useQuery({
     queryKey: ["interviews-all"],
@@ -165,14 +166,14 @@ function InterviewsPage() {
             <table className="w-full text-sm">
               <thead className="bg-muted/50 text-xs uppercase text-muted-foreground">
                 <tr>
-                  {["#", "Date", "Slot", "Candidate", "Role", "Panelist", "Round", "Status", "Result"].map((h) => (
+                  {["#", "Date", "Slot", "Candidate", "Role", "Panelist", "Round", "Status", "Result", "Score", "Report"].map((h) => (
                     <th key={h} className="px-4 py-3 text-left">{h}</th>
                   ))}
                 </tr>
               </thead>
               <tbody>
                 {filtered.length === 0 ? (
-                  <tr><td colSpan={9} className="text-center py-12 text-muted-foreground">No interviews match the filters.</td></tr>
+                  <tr><td colSpan={11} className="text-center py-12 text-muted-foreground">No interviews match the filters.</td></tr>
                 ) : filtered.map((i: any, idx: number) => (
                   <tr key={i.id} className="border-t hover:bg-accent/40">
                     <td className="px-4 py-3 text-muted-foreground">{idx + 1}</td>
@@ -184,6 +185,14 @@ function InterviewsPage() {
                     <td className="px-4 py-3">R{i.round_number}</td>
                     <td className="px-4 py-3 capitalize text-xs">{i.status.replace(/_/g, " ")}</td>
                     <td className="px-4 py-3 capitalize text-xs">{i.result.replace(/_/g, " ")}</td>
+                    <td className="px-4 py-3 text-xs">{i.score != null ? `${i.score}/5` : "—"}</td>
+                    <td className="px-4 py-3">
+                      {i.report_html ? (
+                        <Button variant="ghost" size="sm" className="h-7 px-2 text-xs" onClick={() => setReportInterview(i)}>
+                          <FileText className="h-3.5 w-3.5 mr-1" />View
+                        </Button>
+                      ) : <span className="text-muted-foreground text-xs">—</span>}
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -191,6 +200,24 @@ function InterviewsPage() {
           </div>
         </Card>
       </div>
+
+      <Sheet open={!!reportInterview} onOpenChange={(v) => { if (!v) setReportInterview(null); }}>
+        <SheetContent className="w-full sm:max-w-2xl p-6 overflow-y-auto">
+          <SheetHeader>
+            <SheetTitle>
+              Interview Report — {reportInterview?.candidates?.name ?? ""}
+              {reportInterview?.score != null && (
+                <span className="ml-3 text-sm font-normal text-muted-foreground">Score: {reportInterview.score}/5</span>
+              )}
+            </SheetTitle>
+          </SheetHeader>
+          <div className="mt-4 prose prose-sm max-w-none dark:prose-invert">
+            {reportInterview?.report_html ? (
+              <div dangerouslySetInnerHTML={{ __html: reportInterview.report_html }} />
+            ) : null}
+          </div>
+        </SheetContent>
+      </Sheet>
     </div>
   );
 }
