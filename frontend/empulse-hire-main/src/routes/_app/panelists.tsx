@@ -19,7 +19,7 @@ function PanelistsPage() {
   const { isAdmin } = useAuth();
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);
-  const [form, setForm] = useState({ name: "", emp_id: "", email: "", designation: "" });
+  const [form, setForm] = useState({ name: "", emp_id: "", email: "", designation: "", roles: "" });
   const [q, setQ] = useState("");
   const [activeFilter, setActiveFilter] = useState("all");
 
@@ -39,13 +39,14 @@ function PanelistsPage() {
 
   const submit = async () => {
     try {
+      const eligible_for = form.roles.split(",").map(r => r.trim()).filter(Boolean);
       await api("/api/panelists", {
         method: "POST",
-        body: JSON.stringify(form),
+        body: JSON.stringify({ ...form, eligible_for }),
       });
-      toast.success("Panelist added");
+      toast.success("Panelist added — calendar auth email sent");
       setOpen(false);
-      setForm({ name: "", emp_id: "", email: "", designation: "" });
+      setForm({ name: "", emp_id: "", email: "", designation: "", roles: "" });
       qc.invalidateQueries({ queryKey: ["panelists"] });
     } catch (e: any) { toast.error(e.message ?? "Failed"); }
   };
@@ -66,6 +67,11 @@ function PanelistsPage() {
                   <div><Label>Employee ID</Label><Input value={form.emp_id} onChange={(e) => setForm({ ...form, emp_id: e.target.value })} /></div>
                   <div><Label>Email</Label><Input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} /></div>
                   <div><Label>Designation</Label><Input placeholder="e.g. Senior Engineer" value={form.designation} onChange={(e) => setForm({ ...form, designation: e.target.value })} /></div>
+                  <div>
+                    <Label>Roles (comma-separated)</Label>
+                    <Input placeholder="e.g. Associate Engineer, AI Engineer Intern" value={form.roles} onChange={(e) => setForm({ ...form, roles: e.target.value })} />
+                    <p className="text-xs text-muted-foreground mt-1">Leave blank to allow all roles</p>
+                  </div>
                   <Button onClick={submit} className="w-full">Save</Button>
                 </div>
               </SheetContent>

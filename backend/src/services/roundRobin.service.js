@@ -25,8 +25,9 @@ async function getEligiblePanelists(roleApplied) {
       .map(r => r._id.toString())
   )
 
+  // Panelists with empty eligibleFor are eligible for all roles
   const panelists = await Panelist.find({
-    eligibleFor: roleApplied,
+    $or: [{ eligibleFor: roleApplied }, { eligibleFor: { $size: 0 } }],
     authStatus: true
   }).sort({ lastAssignedAt: 1 })
 
