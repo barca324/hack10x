@@ -8,21 +8,15 @@ router.get('/google', passport.authenticate('google', { scope: ['profile', 'emai
 
 // OAuth callback
 router.get('/google/callback',
-  passport.authenticate('google', { failureRedirect: '/api/auth/login-failed' }),
+  passport.authenticate('google', {
+    failureRedirect: `${process.env.FRONTEND_URL || 'http://localhost:8080'}/access-denied`
+  }),
   (req, res) => {
     if (process.env.FRONTEND_URL)
       return res.redirect(`${process.env.FRONTEND_URL}/dashboard`)
     res.json({ message: 'Login successful', user: req.user })
   }
 )
-
-// Login failed
-router.get('/login-failed', (req, res) => {
-  res.status(401).json({
-    error: 'Login failed',
-    reason: 'Your account is not authorized. Make sure your email matches SUPER_ADMIN_EMAIL or is added to the HR whitelist by the admin.'
-  })
-})
 
 // ── DEV-ONLY: bypass login for Postman testing ────────────────────────────────
 // REMOVE THIS IN PRODUCTION

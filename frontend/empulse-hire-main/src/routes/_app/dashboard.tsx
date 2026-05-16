@@ -126,9 +126,7 @@ function Dashboard() {
       <PageHeader
         title="Dashboard"
         subtitle="Overview of your interview pipeline"
-        actions={
-          <Button asChild variant="outline"><Link to="/candidates"><Plus className="h-4 w-4 mr-1" />Add Candidate</Link></Button>
-        }
+        actions={null}
       />
 
       <div className="p-6 space-y-6">

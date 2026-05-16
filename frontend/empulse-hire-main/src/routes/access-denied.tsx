@@ -10,20 +10,19 @@ export const Route = createFileRoute("/access-denied")({
 });
 
 function AccessDenied() {
-  const { user, signOut } = useAuth();
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-background to-accent/30 p-4">
       <Card className="max-w-md p-8 text-center">
         <div className="flex justify-center mb-4"><div className="bg-sidebar p-3 rounded-lg"><Logo /></div></div>
         <ShieldAlert className="h-12 w-12 text-destructive mx-auto mb-3" />
-        <h1 className="text-2xl font-bold mb-2">Access Denied</h1>
-        <p className="text-sm text-muted-foreground mb-1">
-          Your account <span className="font-medium text-foreground">{user?.email}</span> is not on the IndiaMART IMS allow-list.
+        <h1 className="text-2xl font-bold mb-2">Not Authorized</h1>
+        <p className="text-muted-foreground mb-2">
+          You are not authorized to access this portal.
         </p>
         <p className="text-sm text-muted-foreground mb-6">
-          Please contact your HR administrator to request access.
+          If you think this is a mistake, please contact HR.
         </p>
-        <Button onClick={signOut} variant="outline">Sign out</Button>
+        <Button variant="outline" onClick={() => window.location.href = '/login'}>Back to Login</Button>
       </Card>
     </div>
   );

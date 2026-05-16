@@ -142,14 +142,14 @@ function InterviewsPage() {
             <Select value={statusFilter} onValueChange={setStatusFilter}>
               <SelectTrigger className="w-48"><SelectValue placeholder="Status" /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All statuses</SelectItem>
+                <SelectItem value="all">All</SelectItem>
                 {statuses.map((s: any) => <SelectItem key={s} value={s}>{String(s).replace(/_/g, " ")}</SelectItem>)}
               </SelectContent>
             </Select>
             <Select value={resultFilter} onValueChange={setResultFilter}>
               <SelectTrigger className="w-44"><SelectValue placeholder="Result" /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All results</SelectItem>
+                <SelectItem value="all">All</SelectItem>
                 {results.map((r: any) => <SelectItem key={r} value={r}>{String(r).replace(/_/g, " ")}</SelectItem>)}
               </SelectContent>
             </Select>
