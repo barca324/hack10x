@@ -7,17 +7,18 @@ const jwt = require('jsonwebtoken')
 
 exports.listHR = async (req, res, next) => {
   try {
-    const hrs = await HR.find().select('name email designation rolesResponsibleFor isActive addedBy createdAt')
+    const hrs = await HR.find().select('name email designation rolesResponsibleFor role isActive addedBy createdAt')
     res.json(hrs)
   } catch (err) { next(err) }
 }
 
 exports.addHR = async (req, res, next) => {
   try {
-    const { name, email, designation, rolesResponsibleFor } = req.body
+    const { name, email, designation, rolesResponsibleFor, role } = req.body
     if (!email.endsWith('@indiamart.com'))
       return res.status(400).json({ error: 'Email must be @indiamart.com' })
-    const hr = await HR.create({ name, email, designation, rolesResponsibleFor, addedBy: req.user.email })
+    const safeRole = role === 'admin' ? 'admin' : 'hr'
+    const hr = await HR.create({ name, email, designation, rolesResponsibleFor, role: safeRole, addedBy: req.user.email })
     res.status(201).json(hr)
   } catch (err) { next(err) }
 }

@@ -38,10 +38,10 @@ passport.use(new GoogleStrategy({
       return done(null, false, { message: 'Not authorized. Contact admin.' })
     }
 
-    console.log('   ✅ HR login:', email)
+    console.log(`   ✅ ${hr.role === 'admin' ? 'Admin' : 'HR'} login:`, email)
     return done(null, {
       email,
-      role: 'hr',
+      role: hr.role || 'hr',
       name: hr.name,
       hrRoles: hr.rolesResponsibleFor
     })

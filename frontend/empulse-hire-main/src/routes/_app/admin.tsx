@@ -45,10 +45,20 @@ function AdminPage() {
   if (!isAdmin) return <Navigate to="/dashboard" />;
 
   const addUser = async () => {
+    if (!form.name.trim()) return toast.error("Name is required");
+    if (!form.email.trim()) return toast.error("Email is required");
+    if (!form.email.toLowerCase().endsWith("@indiamart.com")) return toast.error("Email must be an @indiamart.com address");
+    if (!form.designation.trim()) return toast.error("Designation is required");
     try {
       await api("/api/admin/hr", {
         method: "POST",
-        body: JSON.stringify({ name: form.name, email: form.email, designation: form.designation, rolesResponsibleFor: [] }),
+        body: JSON.stringify({
+          name: form.name,
+          email: form.email,
+          designation: form.designation,
+          rolesResponsibleFor: [],
+          role: form.role === "admin" ? "admin" : "hr",
+        }),
       });
       toast.success("User added. They can now sign in with Google.");
       setForm({ name: "", email: "", designation: "", level_code: "E2", role: "hr" });
@@ -77,9 +87,8 @@ function AdminPage() {
                 <Select value={form.role} onValueChange={(v) => setForm({ ...form, role: v })}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="admin">Admin</SelectItem>
                     <SelectItem value="hr">HR</SelectItem>
-                    <SelectItem value="panelist">Panelist</SelectItem>
+                    <SelectItem value="admin">Admin</SelectItem>
                   </SelectContent>
                 </Select>
                 <Button onClick={addUser}>Add</Button>
@@ -121,17 +130,19 @@ function AdminPage() {
                     <th className="px-4 py-3 text-left">Name</th>
                     <th className="px-4 py-3 text-left">Email</th>
                     <th className="px-4 py-3 text-left">Designation</th>
+                    <th className="px-4 py-3 text-left">Role</th>
                     <th className="px-4 py-3 text-left">Active</th>
                   </tr>
                 </thead>
                 <tbody>
                   {filteredUsers.length === 0 ? (
-                    <tr><td colSpan={4} className="text-center py-8 text-muted-foreground">No users found.</td></tr>
+                    <tr><td colSpan={5} className="text-center py-8 text-muted-foreground">No users found.</td></tr>
                   ) : filteredUsers.map((u: any) => (
                     <tr key={u.id} className="border-t">
                       <td className="px-4 py-3 font-medium">{u.name}</td>
                       <td className="px-4 py-3">{u.email}</td>
                       <td className="px-4 py-3">{u.designation || "—"}</td>
+                      <td className="px-4 py-3 capitalize">{u.role || "hr"}</td>
                       <td className="px-4 py-3">{u.is_active ? "✅" : "❌"}</td>
                     </tr>
                   ))}

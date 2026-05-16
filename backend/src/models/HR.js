@@ -5,6 +5,7 @@ const hrSchema = new mongoose.Schema({
   email: { type: String, unique: true, required: true }, // must be @indiamart.com
   designation: String,
   rolesResponsibleFor: [String], // e.g. ["Associate Engineer", "AI Engineer Intern"]
+  role: { type: String, enum: ['admin', 'hr'], default: 'hr' },
   isActive: { type: Boolean, default: true },
   addedBy: String, // super-admin email
   createdAt: { type: Date, default: Date.now }

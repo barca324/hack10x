@@ -51,6 +51,7 @@ export function normalizeHR(u: any) {
     name: u.name,
     email: u.email,
     designation: u.designation ?? null,
+    role: u.role ?? 'hr',
     level_code: null,
     is_active: u.isActive ?? true,
     user_id: null,
