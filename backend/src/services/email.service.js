@@ -1,16 +1,17 @@
-const { Resend } = require('resend')
+const sgMail = require('@sendgrid/mail')
+sgMail.setApiKey(process.env.SENDGRID_API_KEY)
 
-const resend = new Resend(process.env.RESEND_API_KEY)
-const FROM = process.env.FROM_EMAIL || 'onboarding@resend.dev'
+const FROM = process.env.FROM_EMAIL || 'madhusudan329832@gmail.com'
 
 async function sendMail({ to, subject, html, bcc }) {
-  await resend.emails.send({
-    from: `Interview Scheduler <${FROM}>`,
+  const msg = {
+    from: { email: FROM, name: 'Interview Scheduler' },
     to: Array.isArray(to) ? to : [to],
     subject,
     html,
-    ...(bcc && { bcc: Array.isArray(bcc) ? bcc : [bcc] }),
-  })
+  }
+  if (bcc) msg.bcc = Array.isArray(bcc) ? bcc : [bcc]
+  await sgMail.send(msg)
 }
 
 // ── Workflow 5: Panelist Calendar Auth ────────────────────────────────────────
