@@ -41,7 +41,7 @@ function PanelistsPage() {
     if (!form.name.trim()) return toast.error("Name is required");
     if (!form.emp_id.trim()) return toast.error("Employee ID is required");
     if (!form.email.trim()) return toast.error("Email is required");
-    if (!form.email.toLowerCase().endsWith("@gmail.com")) return toast.error("Email must be a Gmail address");
+    if (!form.email.toLowerCase().endsWith("@indiamart.com")) return toast.error("Email must be an @indiamart.com address");
     if (!form.designation.trim()) return toast.error("Designation is required");
     try {
       const eligible_for = form.roles.split(",").map(r => r.trim()).filter(Boolean);
