@@ -18,6 +18,9 @@ const { startScheduler } = require('./services/scheduler.service')
 
 const app = express()
 
+// Trust Railway's reverse proxy so secure cookies work over HTTPS
+app.set('trust proxy', 1)
+
 // ── CORS — allow frontend to send cookies cross-origin ────────────────────────
 const FRONTEND = process.env.FRONTEND_URL || 'http://localhost:5173'
 app.use((req, res, next) => {
