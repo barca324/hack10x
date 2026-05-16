@@ -20,7 +20,6 @@ function InterviewsPage() {
   const qc = useQueryClient();
   const [q, setQ] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
-  const [resultFilter, setResultFilter] = useState("all");
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({ candidateId: "", panelistId: "", date: "", time: "" });
   const [submitting, setSubmitting] = useState(false);
@@ -47,11 +46,8 @@ function InterviewsPage() {
   });
 
   const statuses = useMemo(() => Array.from(new Set(interviews.map((i: any) => i.status))), [interviews]);
-  const results = useMemo(() => Array.from(new Set(interviews.map((i: any) => i.result))), [interviews]);
-
   const filtered = interviews.filter((i: any) => {
     if (statusFilter !== "all" && i.status !== statusFilter) return false;
-    if (resultFilter !== "all" && i.result !== resultFilter) return false;
     if (q && !`${i.candidates?.name ?? ""} ${i.candidates?.role_applied ?? ""} ${i.panelists?.name ?? ""}`.toLowerCase().includes(q.toLowerCase())) return false;
     return true;
   });
@@ -147,14 +143,7 @@ function InterviewsPage() {
                 {statuses.map((s: any) => <SelectItem key={s} value={s}>{String(s).replace(/_/g, " ")}</SelectItem>)}
               </SelectContent>
             </Select>
-            <Select value={resultFilter} onValueChange={setResultFilter}>
-              <SelectTrigger className="w-44"><SelectValue placeholder="Result" /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All</SelectItem>
-                {results.map((r: any) => <SelectItem key={r} value={r}>{String(r).replace(/_/g, " ")}</SelectItem>)}
-              </SelectContent>
-            </Select>
-            <Button variant="ghost" size="sm" onClick={() => { setQ(""); setStatusFilter("all"); setResultFilter("all"); }}>
+            <Button variant="ghost" size="sm" onClick={() => { setQ(""); setStatusFilter("all"); }}>
               <X className="h-3 w-3 mr-1" />Clear Filters
             </Button>
           </div>
@@ -166,14 +155,14 @@ function InterviewsPage() {
             <table className="w-full text-sm">
               <thead className="bg-muted/50 text-xs uppercase text-muted-foreground">
                 <tr>
-                  {["#", "Date", "Slot", "Candidate", "Role", "Panelist", "Round", "Status", "Result", "Score", "Report"].map((h) => (
+                  {["#", "Date", "Slot", "Candidate", "Role", "Panelist", "Round", "Status", "Report"].map((h) => (
                     <th key={h} className="px-4 py-3 text-left">{h}</th>
                   ))}
                 </tr>
               </thead>
               <tbody>
                 {filtered.length === 0 ? (
-                  <tr><td colSpan={11} className="text-center py-12 text-muted-foreground">No interviews match the filters.</td></tr>
+                  <tr><td colSpan={9} className="text-center py-12 text-muted-foreground">No interviews match the filters.</td></tr>
                 ) : filtered.map((i: any, idx: number) => (
                   <tr key={i.id} className="border-t hover:bg-accent/40">
                     <td className="px-4 py-3 text-muted-foreground">{idx + 1}</td>
@@ -184,8 +173,6 @@ function InterviewsPage() {
                     <td className="px-4 py-3">{i.panelists?.name || "—"}</td>
                     <td className="px-4 py-3">R{i.round_number}</td>
                     <td className="px-4 py-3 capitalize text-xs">{i.status.replace(/_/g, " ")}</td>
-                    <td className="px-4 py-3 capitalize text-xs">{i.result.replace(/_/g, " ")}</td>
-                    <td className="px-4 py-3 text-xs">{i.score != null ? `${i.score}/5` : "—"}</td>
                     <td className="px-4 py-3">
                       {i.report_html ? (
                         <Button variant="ghost" size="sm" className="h-7 px-2 text-xs" onClick={() => setReportInterview(i)}>
@@ -204,12 +191,7 @@ function InterviewsPage() {
       <Sheet open={!!reportInterview} onOpenChange={(v) => { if (!v) setReportInterview(null); }}>
         <SheetContent className="w-full sm:max-w-2xl p-6 overflow-y-auto">
           <SheetHeader>
-            <SheetTitle>
-              Interview Report — {reportInterview?.candidates?.name ?? ""}
-              {reportInterview?.score != null && (
-                <span className="ml-3 text-sm font-normal text-muted-foreground">Score: {reportInterview.score}/5</span>
-              )}
-            </SheetTitle>
+            <SheetTitle>Interview Report — {reportInterview?.candidates?.name ?? ""}</SheetTitle>
           </SheetHeader>
           <div className="mt-4 prose prose-sm max-w-none dark:prose-invert">
             {reportInterview?.report_html ? (
