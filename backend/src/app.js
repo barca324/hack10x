@@ -63,6 +63,7 @@ app.use(passport.session())
 // ── Routes ────────────────────────────────────────────────────────────────────
 // ── Extension feedback (no session — uses API key) ────────────────────────────
 const Interview = require('./models/Interview')
+const Candidate = require('./models/Candidate')
 app.post('/api/interviews/submit-feedback', async (req, res) => {
   const key = req.headers['x-api-key']
   if (!key || key !== process.env.EXTENSION_API_KEY)
@@ -83,6 +84,8 @@ app.post('/api/interviews/submit-feedback', async (req, res) => {
   interview.score = score ?? null
   interview.reportHtml = reportHtml ?? null
   await interview.save()
+
+  await Candidate.findByIdAndUpdate(interview.candidateId, { interviewStatus: 'interview_completed' })
 
   res.json({ message: 'Feedback submitted', interviewId: interview._id })
 })
